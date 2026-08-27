@@ -663,3 +663,152 @@ if ($("date")) {
         date.toISOString().split("T")[0];
 
 }
+/* ==========================================
+   CITY AUTOCOMPLETE
+========================================== */
+
+const airportCities = [
+    { name: "Delhi", code: "DEL" },
+    { name: "Mumbai", code: "BOM" },
+    { name: "Bangalore", code: "BLR" },
+    { name: "Kolkata", code: "CCU" },
+    { name: "Hyderabad", code: "HYD" },
+    { name: "Chennai", code: "MAA" },
+    { name: "Ahmedabad", code: "AMD" },
+    { name: "Pune", code: "PNQ" },
+    { name: "Goa", code: "GOI" },
+    { name: "Jaipur", code: "JAI" },
+    { name: "Lucknow", code: "LKO" },
+    { name: "Varanasi", code: "VNS" },
+    { name: "Patna", code: "PAT" },
+    { name: "Bhubaneswar", code: "BBI" },
+    { name: "Guwahati", code: "GAU" },
+    { name: "Chandigarh", code: "IXC" },
+    { name: "Kochi", code: "COK" },
+    { name: "Indore", code: "IDR" },
+    { name: "Nagpur", code: "NAG" },
+    { name: "Surat", code: "STV" }
+];
+
+
+function setupAutocomplete(inputId, suggestionId) {
+
+    const input = $(inputId);
+    const box = $(suggestionId);
+
+    if (!input || !box) return;
+
+
+    input.addEventListener("input", function () {
+
+        const query = input.value
+            .trim()
+            .toLowerCase();
+
+        box.innerHTML = "";
+
+        if (!query) {
+            box.classList.remove("show");
+            return;
+        }
+
+
+        const matches = airportCities.filter(city =>
+            city.name.toLowerCase().includes(query) ||
+            city.code.toLowerCase().includes(query)
+        );
+
+
+        if (matches.length === 0) {
+
+            box.classList.remove("show");
+            return;
+
+        }
+
+
+        matches.slice(0, 6).forEach(city => {
+
+            const item =
+                document.createElement("div");
+
+            item.className = "suggestion-item";
+
+            item.innerHTML = `
+                <span class="suggestion-icon">✈</span>
+                <span>
+                    <strong>${city.name}</strong>
+                    <small>${city.code}</small>
+                </span>
+            `;
+
+
+            item.addEventListener("click", function () {
+
+                input.value =
+                    `${city.name} (${city.code})`;
+
+                box.innerHTML = "";
+
+                box.classList.remove("show");
+
+                updateRoute();
+
+            });
+
+
+            box.appendChild(item);
+
+        });
+
+
+        box.classList.add("show");
+
+    });
+
+
+    input.addEventListener("focus", function () {
+
+        if (input.value.trim()) {
+
+            input.dispatchEvent(
+                new Event("input")
+            );
+
+        }
+
+    });
+
+}
+
+
+/* Initialize autocomplete */
+
+setupAutocomplete(
+    "from",
+    "fromSuggestions"
+);
+
+setupAutocomplete(
+    "to",
+    "toSuggestions"
+);
+
+
+/* Close suggestions when clicking outside */
+
+document.addEventListener("click", function (event) {
+
+    if (
+        !event.target.closest(".autocomplete-field")
+    ) {
+
+        document
+            .querySelectorAll(".suggestions")
+            .forEach(box =>
+                box.classList.remove("show")
+            );
+
+    }
+
+});
